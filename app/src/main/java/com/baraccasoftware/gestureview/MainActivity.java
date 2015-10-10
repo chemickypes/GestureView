@@ -48,6 +48,13 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
+        view.setOnTouchListener(new PanelTouchListener(MainActivity.this) {
+            @Override
+            public void remove() {
+                Log.d(MainActivity.class.getName(),"remove");
+            }
+        });
+
 
         findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
