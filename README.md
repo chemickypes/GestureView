@@ -9,6 +9,8 @@ This class extends LinearLayout, but you can extends any Layout you want.
 
 It allows you to close and open layout itself with scrolling animation.
 
+With new commit, this class can be dragged with the same PanelTouchListener behavior.
+
 ## PanelTouchListener
 This class is abstract and implements View.OnTouchListener to create a drag effect like Tinder.
 You must implement remove() abstract method to perform final action. 

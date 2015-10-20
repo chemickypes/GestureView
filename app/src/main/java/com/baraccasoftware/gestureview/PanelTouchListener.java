@@ -135,7 +135,15 @@ public  abstract class PanelTouchListener implements View.OnTouchListener {
                 } else {
                     //ok dobbiamo toglierlo
                     remove();
-                    animating = false;
+
+                    v.animate().y(iY).x(iX).rotation(0).setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            animating = false;
+                        }
+                    });
+                    //animating = false;
                 }
                 break;
             default:

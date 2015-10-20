@@ -1,13 +1,22 @@
 package com.baraccasoftware.gestureview;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
+import android.graphics.Point;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.Display;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 import android.view.animation.Transformation;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 /**
  * Created by angelomoroni on 09/10/15.
@@ -16,6 +25,7 @@ public class VerticalScrollingLinearLayout extends LinearLayout {
 
     private static final int ZERO_TARGET_HEIGHT = 0;
     private static final int MIN_DURATION = 200;
+    private static final String TAG = VerticalScrollingLinearLayout.class.getName();
     private  ResizeAnimation resizeAnimation;
     private int targetHeight = ZERO_TARGET_HEIGHT;
     private int initialHeight;
@@ -24,6 +34,19 @@ public class VerticalScrollingLinearLayout extends LinearLayout {
     private boolean open = true;
     private boolean setFlag = false;
     private boolean animating = false;
+
+    private float mLastX,mStartY,mStartX,mLastY;
+    private boolean mIsAnimating = false;
+    private int mTouchSlop;
+
+
+    private float iY,iX;
+
+    private int action;
+    private int windowwidth;
+   private int  x_cord,y_cord,x,y;
+    private int screenCenter;
+    private boolean isScollViewScrollable;
 
     public VerticalScrollingLinearLayout(Context context) {
         super(context);
@@ -43,6 +66,17 @@ public class VerticalScrollingLinearLayout extends LinearLayout {
 
     private void init() {
         resizeAnimation = new ResizeAnimation(this);
+
+        mTouchSlop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+
+        WindowManager wm = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+
+        Point size = new Point();
+        display.getSize(size);
+        windowwidth = size.x;
+
+        screenCenter = windowwidth / 2;
     }
 
 
@@ -101,6 +135,153 @@ public class VerticalScrollingLinearLayout extends LinearLayout {
 
         resizeAnimation.setMisures(initialHeight,targetHeight);
         startAnimation();
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                mLastX = ev.getRawX();
+                mLastY = ev.getRawY();
+                mStartX = mLastX;
+                mStartY = mLastY;
+
+                //coordinate iniziali
+                iY = getY();
+                iX = getX();
+
+                setIfScrollViewCanScroll();
+                Log.d(TAG,"INT MotionEvent.ACTION_DOWN");
+                Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
+                break;
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mIsAnimating = false;
+                Log.d(TAG,"INT MotionEvent.ACTION_CANCEL or MotionEvent.ACTION_UP");
+                Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
+                break;
+            case MotionEvent.ACTION_MOVE:
+                Log.d(TAG,"INT MotionEvent.ACTION_MOVE");
+                Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
+                float x = ev.getRawX();
+                float y = ev.getRawY();
+                float xDelta = Math.abs(x - mLastX);
+                float yDelta = Math.abs(y - mLastY);
+
+                float yDeltaTotal = y - mStartY;
+                float xDeltaTotal = x - mStartX;
+                if(mIsAnimating || !isScollViewScrollable){
+
+
+                    Log.d(TAG,"INT MotionEvent.ACTION_MOVE ANIMATING");
+                    Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
+
+                    return true;
+
+                }else {
+                    if (Math.abs(xDelta)>Math.abs(yDelta) && Math.abs(xDelta) > mTouchSlop) {
+                        mIsAnimating = true;
+                        mStartX = x;
+                        Log.d(TAG,"INT MotionEvent.ACTION_MOVE start ANIMATING");
+                        Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
+                        return true;
+                    }else  {
+                        mIsAnimating = false;
+                        Log.d(TAG,"INT MotionEvent.ACTION_MOVE stop ANIMATING");
+                        Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
+
+                        //mStartY = y;
+                        //return false;
+                    }
+                }
+
+                break;
+        }
+
+        return false;
+    }
+
+    private void setIfScrollViewCanScroll() {
+        ScrollView scrollView = (ScrollView) getChildAt(0);
+        View child = scrollView.getChildAt(0);
+        isScollViewScrollable = scrollView.getHeight() < child.getHeight() + scrollView.getPaddingTop() + scrollView.getPaddingBottom();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        switch (event.getAction()){
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+                mIsAnimating = false;
+                Log.d(TAG,"INT MotionEvent.ACTION_CANCEL or MotionEvent.ACTION_UP");
+                Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
+
+                if (action == 0) {
+                    // Log.e("Event Status", "Nothing");
+                    animate().y(iY).x(iX).rotation(0).setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            animating = false;
+                        }
+                    });
+
+                } else {
+
+
+                    animate().y(iY).x(iX).rotation(0).setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            animating = false;
+                        }
+                    });
+                }
+
+                break;
+            case MotionEvent.ACTION_MOVE:
+                x_cord = (int) event.getRawX();
+                y_cord = (int) event.getRawY();
+
+                setX(iX + (x_cord - mLastX));
+                setY(iY + (y_cord - mLastY));
+                if (x_cord >= screenCenter) {
+                    //v.setRotation((float) ((x_cord - x) * (Math.PI / 42)));
+                    if (x_cord > (screenCenter + (screenCenter / 2))) {
+
+                        if (x_cord > (windowwidth - (screenCenter / 4))) {
+                            action = 2;
+                        } else {
+                            action = 0;
+                        }
+                    } else {
+                        action = 0;
+
+                    }
+
+                } else {
+                    // rotate
+                   // v.setRotation((float) ((x_cord - x) * (Math.PI / 42)));
+                    if (x_cord < (screenCenter / 2)) {
+
+                        if (x_cord < screenCenter / 4) {
+                            action = 1;
+                        } else {
+                            action = 0;
+                        }
+                    } else {
+                        action = 0;
+
+                    }
+
+                }
+                break;
+            default: return super.onTouchEvent(event);
+        }
+
+        return true;
+
     }
 
     public VerticalScrollingLinearLayoutListener buildVerticalScollingLinearLayoutListener(){

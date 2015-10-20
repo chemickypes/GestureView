@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">GestureView</string>
     <string name="action_settings">Settings</string>
+    <string name="lorem">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin eu mollis ipsum. Morbi augue mauris, commodo ut neque vel, consequat placerat dolor. Cras sollicitudin est in purus ultricies, vitae faucibus urna elementum. Etiam molestie molestie orci ac mollis. Morbi sed metus gravida, commodo justo non, tempus urna. Mauris tincidunt mauris felis, nec mollis nulla vehicula id. Integer convallis mattis semper. Phasellus eu nisi non dolor malesuada lobortis quis vitae felis.
+
+Duis nec convallis quam. Mauris quis egestas arcu, sed varius elit. Ut condimentum, nisl vel faucibus varius, justo eros imperdiet nulla, in ultricies enim leo vitae ipsum. Nam a nunc porttitor turpis efficitur molestie. Fusce scelerisque sit amet nunc at bibendum. Quisque congue, nunc quis ullamcorper consequat, ipsum mi faucibus turpis, nec congue ligula libero pharetra massa. Ut convallis luctus lectus, sed sodales dolor laoreet ut. Integer lectus odio, maximus in diam id, hendrerit aliquam odio. Curabitur tristique metus ut tristique dapibus.
+
+Integer finibus nisi nec mi commodo tempus. Vestibulum non ante egestas, convallis nunc at, suscipit nibh. Nam vitae justo at magna imperdiet egestas.</string>
 </resources>
